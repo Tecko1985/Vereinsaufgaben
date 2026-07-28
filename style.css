@@ -266,10 +266,28 @@ body.can-edit .list-row:hover { background: var(--blue-light); }
 /* ---------- Formular / Modal ---------- */
 .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
 .form-field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
-.form-field input, .form-field select {
+/* Ausdrücklich NUR echte Eingabefelder -- Kästchen und Punkte müssen ihre
+   Eigengröße behalten. Ein `width: 100%` auf einer Checkbox macht daraus eine
+   500 px breite Box, in die der Browser das Steuerelement mittig zeichnet: der
+   Punkt landet in der Mitte der Zeile, der zugehörige Text weit rechts bzw.
+   unter dem Kästchen. Genau so sahen der Zuweisen- und der Ressort-Dialog aus.
+   Die Regel schlug dabei `.checkbox-row input { width: 16px }` -- gleiche
+   Spezifität, aber sie steht später in der Datei.
+   Umgekehrt fehlte `textarea` ganz und blieb im Browser-Default: 163 px schmal,
+   Monospace, ohne Innenabstand, während das Textfeld daneben korrekt aussah. */
+.form-field input:not([type="checkbox"]):not([type="radio"]),
+.form-field select,
+.form-field textarea {
   width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit;
 }
+.form-field textarea { resize: vertical; min-height: 72px; }
 .form-field.wide { grid-column: 1 / -1; }
+/* Die Blöcke außerhalb des Rasters (An wen?, Personen, Ressort, Schalterzeile)
+   standen ohne jeden Abstand aufeinander -- den Abstand liefert sonst das
+   `gap` des .form-grid, und das greift bei direkten Formularkindern nicht.
+   Sichtbar daran, dass der Hinweis unter "Personen" am nächsten Feldnamen klebte. */
+.modal-body form > .form-field { margin-bottom: 14px; }
+.modal-body form > .form-field:last-child { margin-bottom: 0; }
 #meta-view .form-field span, #season-info { font-size: 14px; }
 
 .modal-overlay {
@@ -439,7 +457,28 @@ nav .nav-right { margin-left: auto; display: flex; gap: inherit; }
 .kommentar-neu textarea { flex:1 1 100%; }
 
 .radio-row { display:flex; flex-direction:column; gap:6px; }
-.radio-row label { display:flex; align-items:center; gap:8px; }
+/* Die Schalterzeile trägt zwei lange Beschriftungen nebeneinander -- ohne Umbruch
+   wird sie am Handy breiter als das Fenster, ohne flex-start hängen unterschiedlich
+   hohe Beschriftungen mittig zueinander statt oben bündig. */
+.checkbox-row { align-items: flex-start; flex-wrap: wrap; gap: 10px 18px; }
+.checkbox-row > label { flex: 1 1 240px; }
+
+/* Auswahl-Beschriftungen sind Bedienelemente, keine Feldnamen. `.form-field label`
+   (12 px, grau, fett, display:block) ist für die Überschrift ÜBER einem Feld
+   gedacht und macht aus einem Auswahltext eine blasse Mini-Zeile -- und weil
+   `display:block` das Kästchen auf eine eigene Zeile stellt, stand es über statt
+   neben dem Text. Hier also zurückdrehen. */
+.radio-row label,
+.checkbox-row label,
+.checkbox-list label {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 14px; font-weight: 400; color: var(--text);
+  margin-bottom: 0; cursor: pointer;
+}
+/* Das Kästchen darf nicht schrumpfen und sitzt auf Höhe der ersten Textzeile. */
+.radio-row label > input,
+.checkbox-row label > input,
+.checkbox-list label > input { flex-shrink: 0; margin-top: 2px; }
 
 .btn.tiny { padding:3px 9px; font-size:.76rem; }
 .header-status.error { color:#c0392b; font-weight:600; }
