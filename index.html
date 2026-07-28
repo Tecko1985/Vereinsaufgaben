@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🗂️ Vereinsaufgaben</title>
+<meta name="theme-color" content="#1a56a0" />
+<link rel="stylesheet" href="style.css?v=1.0" />
+</head>
+<body>
+
+  <div class="connect-screen" id="connect-screen">
+    <div class="card">
+      <h2>🗂️ Vereinsaufgaben</h2>
+      <p id="connect-message">Bitte über die Tools-Übersicht anmelden, um die Aufgaben zu sehen.</p>
+      <div class="btn-row">
+        <a class="btn" href="https://tecko1985.github.io/ToolsUebersicht/">Zur Tools-Übersicht</a>
+      </div>
+      <p class="muted" id="cloud-error" style="margin-top:14px;"></p>
+    </div>
+  </div>
+
+  <div id="app-shell" style="display:none;">
+    <header>
+      <h1>🗂️ Vereinsaufgaben <span class="version-badge version-badge-link" id="version-badge" role="button" tabindex="0" title="Versionshistorie ansehen"></span></h1>
+      <a href="https://tecko1985.github.io/ToolsUebersicht/" class="back-to-dashboard">← Zurück zum Dashboard</a>
+      <div class="header-right">
+        <button class="btn small editor-only hidden" id="btn-zuweisen-oeffnen">+ Aufgabe zuweisen</button>
+        <span class="header-status" id="save-status"></span>
+        <span class="header-user" id="header-user"></span>
+        <img class="header-logo" src="logo.png" alt="1. SC 1911 e.V. Heilbad Heiligenstadt" />
+      </div>
+    </header>
+
+    <nav>
+      <button data-tab="uebersicht" class="active">Übersicht</button>
+      <button data-tab="meine">Meine Aufgaben <span class="nav-badge hidden" id="nav-badge-meine"></span></button>
+      <button data-tab="alle">Alle Aufgaben</button>
+      <button data-tab="ressorts">Ressorts</button>
+      <div class="nav-right">
+        <button data-tab="verwaltung" class="admin-only hidden">Verwaltung</button>
+        <button data-tab="info">Info</button>
+      </div>
+    </nav>
+
+    <main>
+
+      <!-- ---------- Übersicht: wer tut was ---------- -->
+      <section class="tab-section active" id="tab-uebersicht">
+        <div class="summary-cards" id="summary-cards"></div>
+        <div class="card">
+          <h2>Wer tut was</h2>
+          <p class="muted" style="margin-bottom:14px;">Je Person offene, überfällige und erledigte Aufgaben. Ein Klick klappt die einzelnen Vorgänge auf.</p>
+          <div class="person-list" id="person-list"></div>
+          <div class="empty-state hidden" id="uebersicht-empty">Es ist noch keine Aufgabe erfasst.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Meine Aufgaben ---------- -->
+      <section class="tab-section" id="tab-meine">
+        <div class="card">
+          <h2>An mich gerichtet</h2>
+          <div class="aufgaben-liste" id="meine-liste"></div>
+          <div class="empty-state hidden" id="meine-empty">Für dich ist gerade nichts offen.</div>
+        </div>
+        <div class="card">
+          <h2>Von mir zugewiesen</h2>
+          <p class="muted" style="margin-bottom:14px;">Was du anderen aufgetragen hast — inklusive dessen, was bereits erledigt wurde.</p>
+          <div class="aufgaben-liste" id="vonmir-liste"></div>
+          <div class="empty-state hidden" id="vonmir-empty">Du hast noch niemandem eine Aufgabe zugewiesen.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Alle Aufgaben ---------- -->
+      <section class="tab-section" id="tab-alle">
+        <div class="card">
+          <div class="filter-bar">
+            <input type="search" id="filter-suche" placeholder="Suche in Titel und Beschreibung…" />
+            <select id="filter-person"><option value="">Alle Personen</option></select>
+            <select id="filter-ressort"><option value="">Alle Ressorts</option></select>
+            <select id="filter-status">
+              <option value="offen-alle">Offen und zur Abnahme</option>
+              <option value="">Alle Status</option>
+              <option value="offen">Nur offen</option>
+              <option value="gemeldet">Nur zur Abnahme</option>
+              <option value="ueberfaellig">Nur überfällig</option>
+              <option value="erledigt">Nur erledigt</option>
+              <option value="abgelehnt">Nur abgelehnt</option>
+              <option value="zurueckgezogen">Nur zurückgezogen</option>
+            </select>
+            <span class="filter-count" id="filter-count"></span>
+          </div>
+          <div class="aufgaben-liste" id="alle-liste"></div>
+          <div class="empty-state hidden" id="alle-empty">Keine Aufgabe passt zu diesem Filter.</div>
+        </div>
+        <div class="card">
+          <h2>Export</h2>
+          <p class="muted" style="margin-bottom:14px;">Genau die Aufgaben, die oben gerade angezeigt werden.</p>
+          <div class="btn-row editor-only hidden" style="justify-content:flex-start;">
+            <button type="button" class="btn secondary" id="btn-export-druck">🖨 Druckansicht</button>
+            <button type="button" class="btn secondary" id="btn-export-csv">⬇ Als CSV</button>
+          </div>
+          <p class="muted hidden" id="export-gesperrt">Export und Druck stehen ab Bearbeiten-Recht zur Verfügung.</p>
+        </div>
+      </section>
+
+      <!-- ---------- Ressorts ---------- -->
+      <section class="tab-section" id="tab-ressorts">
+        <div class="card">
+          <h2>Zuständigkeiten</h2>
+          <p class="muted" style="margin-bottom:14px;">Wer welches Ressort verantwortet, wer vertritt und wer mitarbeitet. Angelegt und gepflegt wird das in der Verwaltung.</p>
+          <div class="ressort-list" id="ressort-list"></div>
+          <div class="empty-state hidden" id="ressort-empty">Es ist noch kein Ressort angelegt.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Verwaltung (Administrieren) ---------- -->
+      <section class="tab-section" id="tab-verwaltung">
+        <div class="card">
+          <h2>Ressorts verwalten</h2>
+          <p class="muted" style="margin-bottom:14px;">Ein Ressort hat genau einen Verantwortlichen. Verantwortlicher und Stellvertreter dürfen den Mitgliedern ihres Ressorts Aufgaben zuweisen.</p>
+          <div class="ressort-admin-list" id="ressort-admin-list"></div>
+          <button class="btn small" id="btn-ressort-neu" style="margin-top:10px;">+ Ressort anlegen</button>
+        </div>
+        <div class="card">
+          <h2>Amtsübergabe</h2>
+          <p class="muted" style="margin-bottom:14px;">Überträgt alle noch offenen Aufgaben einer Person auf jemand anderen. Erledigtes bleibt beim ursprünglichen Bearbeiter — ein Personalwechsel schreibt die Vergangenheit nicht um.</p>
+          <div class="form-grid">
+            <div class="form-field"><label>Aufgaben von</label><select id="uebergabe-von"></select></div>
+            <div class="form-field"><label>übertragen auf</label><select id="uebergabe-auf"></select></div>
+          </div>
+          <div class="btn-row" style="justify-content:flex-start;margin-top:10px;">
+            <button class="btn" id="btn-uebergabe">Offene Aufgaben übertragen</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Protokoll</h2>
+          <p class="muted" style="margin-bottom:14px;">Gelöschte Aufgaben und Amtsübergaben. Eine Aufgabe verschwindet aus den Listen, aber nicht aus dieser Aufstellung.</p>
+          <div class="protokoll-list" id="protokoll-list"></div>
+          <div class="empty-state hidden" id="protokoll-empty">Bisher wurde nichts gelöscht oder übertragen.</div>
+        </div>
+      </section>
+
+      <!-- ---------- Info ---------- -->
+      <section class="tab-section" id="tab-info">
+        <div class="card">
+          <h2>Über die Vereinsaufgaben <span class="version-badge" id="version-badge-2"></span></h2>
+          <p class="muted">Aufgaben, die Funktionären aufgetragen werden — mit Frist, Zuständigkeit und dauerhaft einsehbarer Historie. Was du dir selbst notierst, gehört weiterhin in die persönliche Aufgabenliste auf der Startseite der Tools-Übersicht; hier steht ausschließlich, was jemand einem anderen aufträgt.</p>
+          <div class="form-grid" id="meta-view"></div>
+          <p class="muted" id="info-user" style="margin-top:10px;"></p>
+        </div>
+        <div class="card">
+          <h2>Änderungen</h2>
+          <div id="changelog-list"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ---------- Druckbereich ---------- -->
+  <div id="print-area"><div id="print-content"></div></div>
+
+  <!-- ---------- Aufgabe zuweisen ---------- -->
+  <div class="modal-overlay hidden" id="zuweisen-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Aufgabe zuweisen</h2>
+        <button class="modal-close" id="zuweisen-close" aria-label="Schließen">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="zuweisen-form">
+          <div class="form-field wide">
+            <label>An wen? *</label>
+            <div class="radio-row">
+              <label><input type="radio" name="zw-modus" value="person" checked /> Einzelne Personen</label>
+              <label><input type="radio" name="zw-modus" value="ressort" /> An ein Ressort</label>
+              <label><input type="radio" name="zw-modus" value="ressort-einzeln" /> An jedes Ressort-Mitglied einzeln</label>
+            </div>
+          </div>
+          <div class="form-field wide" id="zw-personen-feld">
+            <label>Personen</label>
+            <div id="zw-personen" class="checkbox-list"></div>
+          </div>
+          <div class="form-field wide hidden" id="zw-ressort-feld">
+            <label>Ressort</label>
+            <select id="zw-ressort"></select>
+            <p class="muted" id="zw-ressort-hinweis" style="margin-top:6px;"></p>
+          </div>
+          <div class="form-grid">
+            <div class="form-field wide"><label>Titel *</label><input type="text" id="zw-titel" maxlength="200" placeholder="z. B. Hallenzeiten für die Winterpause beantragen" /></div>
+            <div class="form-field"><label>Frist *</label><input type="date" id="zw-faellig" /></div>
+            <div class="form-field"><label>Priorität</label><select id="zw-prioritaet"></select></div>
+            <div class="form-field wide"><label>Beschreibung</label><textarea id="zw-beschreibung" rows="4" maxlength="4000" placeholder="Einzelheiten, Ansprechpartner, Hintergrund…"></textarea></div>
+          </div>
+          <div class="form-field wide">
+            <div class="checkbox-row">
+              <label><input type="checkbox" id="zw-abnahme" /> Abnahme erforderlich — die Aufgabe gilt erst als erledigt, wenn du sie bestätigst</label>
+              <label><input type="checkbox" id="zw-vertraulich" /> Vertraulich — Unbeteiligte sehen nur Empfänger, Frist und Status</label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div></div>
+        <div class="btn-row">
+          <button class="btn secondary" id="zw-abbrechen">Abbrechen</button>
+          <button class="btn success" id="zw-speichern">Zuweisen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Aufgabe im Detail ---------- -->
+  <div class="modal-overlay hidden" id="detail-modal">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2 id="detail-titel">Aufgabe</h2>
+        <button class="modal-close" id="detail-close" aria-label="Schließen">×</button>
+      </div>
+      <div class="modal-body" id="detail-body"></div>
+      <div class="modal-footer">
+        <button class="btn danger hidden" id="detail-loeschen">Löschen</button>
+        <div class="btn-row" id="detail-aktionen"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- Ressort bearbeiten ---------- -->
+  <div class="modal-overlay hidden" id="ressort-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="ressort-modal-titel">Neues Ressort</h2>
+        <button class="modal-close" id="ressort-close" aria-label="Schließen">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="ressort-form">
+          <div class="form-grid">
+            <div class="form-field wide"><label>Name *</label><input type="text" id="rf-name" maxlength="120" placeholder="z. B. Platzanlage" /></div>
+            <div class="form-field wide"><label>Zuständigkeit</label><textarea id="rf-beschreibung" rows="3" maxlength="2000" placeholder="Wofür ist dieses Ressort verantwortlich?"></textarea></div>
+            <div class="form-field"><label>Verantwortlich *</label><select id="rf-verantwortlich"></select></div>
+            <div class="form-field"><label>Stellvertretung</label><select id="rf-stellvertreter"></select></div>
+          </div>
+          <div class="form-field wide">
+            <label>Weitere Mitglieder</label>
+            <div id="rf-mitglieder" class="checkbox-list"></div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn danger hidden" id="rf-loeschen">Löschen</button>
+        <div class="btn-row">
+          <button class="btn secondary" id="rf-abbrechen">Abbrechen</button>
+          <button class="btn success" id="rf-speichern">Speichern</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="config.js?v=1.0"></script>
+  <script src="db.js?v=1.0"></script>
+  <script src="app.js?v=1.0"></script>
+</body>
+</html>
