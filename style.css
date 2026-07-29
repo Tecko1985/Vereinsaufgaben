@@ -274,10 +274,14 @@ body.can-edit .list-row:hover { background: var(--blue-light); }
    Die Regel schlug dabei `.checkbox-row input { width: 16px }` -- gleiche
    Spezifität, aber sie steht später in der Datei.
    Umgekehrt fehlte `textarea` ganz und blieb im Browser-Default: 163 px schmal,
-   Monospace, ohne Innenabstand, während das Textfeld daneben korrekt aussah. */
+   Monospace, ohne Innenabstand, während das Textfeld daneben korrekt aussah.
+   Das Rückfragen-Feld im Detail-Dialog steckt in keinem `.form-field` und lief
+   deshalb noch nach diesem Fix im Default weiter -- es steht hier mit im
+   Selektor, damit ein Eingabefeld nicht davon abhängt, in welchem Block es liegt. */
 .form-field input:not([type="checkbox"]):not([type="radio"]),
 .form-field select,
-.form-field textarea {
+.form-field textarea,
+.kommentar-neu textarea {
   width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; font-family: inherit;
 }
 .form-field textarea { resize: vertical; min-height: 72px; }
@@ -398,7 +402,10 @@ nav .nav-right { margin-left: auto; display: flex; gap: inherit; }
 .az-titel { font-weight:600; overflow-wrap:anywhere; }
 .az-meta { font-size:.82rem; color:#7a828c; overflow-wrap:anywhere; }
 .az-rechts { display:flex; align-items:center; gap:10px; flex-shrink:0; }
-.az-prio { font-size:.8rem; }
+/* Das Dreieck steht für "hohe Priorität" und ist das einzige Zeichen in der Zeile,
+   das eine Warnung ausdrückt -- bei .8rem war es kleiner als die Frist daneben und
+   ging als Punkt unter. Es darf ruhig größer sein als der Text, den es begleitet. */
+.az-prio { font-size:1.05rem; line-height:1; }
 .az-frist { font-size:.88rem; color:#5b6470; white-space:nowrap; }
 .az-frist.warn { color:#c0392b; font-weight:600; }
 .az-status { display:inline-block; padding:3px 9px; border-radius:11px; color:#fff; font-size:.76rem;
@@ -454,7 +461,7 @@ nav .nav-right { margin-left: auto; display: flex; gap: inherit; }
 .k-kopf { font-size:.78rem; color:#7a828c; }
 .k-text { overflow-wrap:anywhere; }
 .kommentar-neu { display:flex; gap:8px; margin-top:10px; align-items:flex-start; flex-wrap:wrap; }
-.kommentar-neu textarea { flex:1 1 100%; }
+.kommentar-neu textarea { flex:1 1 100%; resize:vertical; min-height:58px; }
 
 .radio-row { display:flex; flex-direction:column; gap:6px; }
 /* Die Schalterzeile trägt zwei lange Beschriftungen nebeneinander -- ohne Umbruch
