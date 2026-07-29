@@ -28,6 +28,21 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
+    version: "1.1",
+    groups: [
+      {
+        title: "Benachrichtigung per E-Mail",
+        items: [
+          "Wer eine neue Aufgabe bekommt, wird per E-Mail darüber informiert — mit Titel, Ressort, Frist und dem Text der Aufgabe. Bisher musste man die App von sich aus öffnen, um von einer laufenden Frist zu erfahren.",
+          "Benachrichtigt wird, wer die Aufgabe erledigen muss: bei einer Zuweisung an das Ressort der Verantwortliche, bei einer aufgefächerten Zuweisung jedes Mitglied. Wer nur mitliest, bekommt keine Mail.",
+          "Eine vertrauliche Aufgabe verrät in der E-Mail weder Titel noch Text — nur, dass es sie gibt, bis wann sie läuft und dass die Einzelheiten in der App stehen.",
+          "Nur das Anlegen löst eine Mail aus. Erledigungen, Abnahmen und Kommentare bleiben bewusst still, damit die Benachrichtigung nicht zu Rauschen wird.",
+          "Die Adresse kommt aus den Trainerdaten. Ist dort keine hinterlegt, sagt die App beim Zuweisen ausdrücklich, wer keine E-Mail bekommen hat."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0",
     groups: [
       {

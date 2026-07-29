@@ -763,10 +763,50 @@ async function speichereZuweisung() {
   try {
     const body = await legeAufgabeAn(daten);
     document.getElementById("zuweisen-modal").classList.add("hidden");
-    setStatusText(`${(body && body.angelegt) || 1} Aufgabe(n) zugewiesen`);
+    meldeVersand(body);
     await ladeDaten();
     renderAll();
   } catch (e) { zeigeFehler(e); }
+}
+
+// Seit 2026-07-29 verschickt der Server beim Anlegen eine E-Mail an die Empfänger.
+// Wer KEINE bekommen hat, ist dabei die wichtigere Hälfte der Nachricht: ohne diese
+// Meldung verlässt sich der Zuweiser auf eine Zustellung, die nie stattgefunden hat.
+// Deshalb steht der Normalfall im flüchtigen Statustext, jede Lücke dagegen in einem
+// Hinweis, den man wegklicken muss.
+function meldeVersand(body) {
+  const angelegt = (body && body.angelegt) || 1;
+  // Antwortet noch der alte Worker (Pages ist vor dem Worker-Deploy draußen),
+  // fehlen die Versandfelder komplett. Dann darf hier NICHTS über E-Mails stehen —
+  // aus fehlenden Feldern "0 benachrichtigt" zu rechnen würde einen Fehlschlag
+  // melden, den es nicht gab.
+  if (!body || typeof body.benachrichtigt !== "number") {
+    setStatusText(`${angelegt} ${angelegt === 1 ? "Aufgabe" : "Aufgaben"} zugewiesen`);
+    return;
+  }
+  const benachrichtigt = body.benachrichtigt;
+  const ohne = body.ohneAdresse || [];
+  const mailAus = !!body.mailAus;
+  const kopf = `${angelegt} ${angelegt === 1 ? "Aufgabe" : "Aufgaben"} zugewiesen`;
+  const fehlgeschlagen = mailAus ? 0 : Math.max(0, angelegt - benachrichtigt - ohne.length);
+
+  const hinweise = [];
+  if (mailAus) {
+    hinweise.push("Es wurde keine E-Mail verschickt — der Mailversand ist gerade nicht verfügbar. Die Aufgabe steht trotzdem in der Liste.");
+  }
+  if (ohne.length) {
+    hinweise.push(`Keine E-Mail bekommen: ${ohne.join(", ")}.\nIn den Trainerdaten ist dazu keine E-Mail-Adresse hinterlegt.`);
+  }
+  if (fehlgeschlagen) {
+    hinweise.push(`Bei ${fehlgeschlagen} ${fehlgeschlagen === 1 ? "Empfänger" : "Empfängern"} ist der Mailversand fehlgeschlagen.`);
+  }
+
+  if (!hinweise.length) {
+    setStatusText(benachrichtigt ? `${kopf} · ${benachrichtigt} per E-Mail benachrichtigt` : kopf);
+    return;
+  }
+  setStatusText(kopf);
+  alert(`${kopf}.\n\n${hinweise.join("\n\n")}`);
 }
 
 // ---------- Ressort-Verwaltung ----------
