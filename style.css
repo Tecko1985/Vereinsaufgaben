@@ -308,6 +308,11 @@ body.can-edit .list-row:hover { background: var(--blue-light); }
 .modal-close:hover { color: var(--text); }
 .modal-body { padding: 20px 22px; }
 .modal-footer { display: flex; justify-content: space-between; gap: 10px; padding: 16px 22px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+/* Der Löschen-Knopf links ist rechteabhängig und verschwindet mit `display:none`
+   ganz aus dem Fluss -- ohne ihn hätte `space-between` nur noch ein Kind zu
+   verteilen und die rechte Gruppe stünde plötzlich links. `margin-left:auto`
+   hängt sie an die rechte Kante, unabhängig davon, wer den Dialog öffnet. */
+.modal-footer > .footer-rechts { margin-left: auto; }
 
 .version-badge {
   font-size: 11px; font-weight: 600;

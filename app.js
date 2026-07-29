@@ -910,6 +910,7 @@ function setupListeners() {
   document.getElementById("zw-ressort").addEventListener("change", aktualisiereZuweisenModus);
 
   document.getElementById("detail-close").addEventListener("click", schliesseDetail);
+  document.getElementById("detail-schliessen").addEventListener("click", schliesseDetail);
   document.getElementById("detail-loeschen").addEventListener("click", loescheAktuelleAufgabe);
   document.getElementById("detail-aktionen").addEventListener("click", (e) => {
     const btn = e.target.closest("[data-akt]");
