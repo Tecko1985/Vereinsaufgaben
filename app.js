@@ -11,12 +11,20 @@ let currentUser = null;
 let ressorts = [];
 let aufgaben = [];
 let protokoll = [];
-let personen = [];          // {username, displayName} — mögliche Empfänger
+let personen = [];          // {username, displayName} — mögliche Empfänger (Bearbeiter)
+let alleNutzer = [];        // {username, displayName} — alle Personalkonten, für die Suche
 let alleAnzeigeNamen = {};  // username -> Anzeigename, auch für Ausgeschiedene
 let aktuellerTab = "uebersicht";
 let offeneDetailId = null;
 let ressortBearbeitetId = null;
 let gefilterteAufgaben = [];
+// Die Mitgliederauswahl des Ressort-Dialogs lebt hier, nicht im DOM: die Liste
+// wird bei jedem Tastendruck in der Suche neu gezeichnet, gesetzte Häkchen wären
+// sonst weg. Aus demselben Grund bleibt jeder Gewählte immer sichtbar, egal was
+// der Suchtext hergibt — eine Auswahl, die aus der Liste fällt, verschwindet
+// beim Speichern still mit.
+let rfAuswahl = new Set();
+let zwAuswahl = new Set();  // dasselbe für den Empfängerpicker im Zuweisen-Dialog
 
 function canEdit()  { return !!(currentUser && (currentUser.isAdmin || currentUser.canEdit));  }
 function canAdmin() { return !!(currentUser && (currentUser.isAdmin || currentUser.canAdmin)); }
@@ -163,6 +171,52 @@ async function ladePersonen() {
     // Ohne Empfängerliste bleibt die App lesbar — nur Zuweisen geht dann nicht.
     personen = [];
   }
+}
+
+// Das volle Verzeichnis braucht nur, wer Ressorts pflegt. Ein Fehlschlag ist
+// deshalb kein Grund, irgendetwas anzuhalten: dann steht im Ressort-Dialog eben
+// wieder nur die Bearbeiterliste, und die Suche filtert diese.
+async function ladeAlleNutzer() {
+  try {
+    const body = await ladeVerzeichnis();
+    alleNutzer = Array.isArray(body.users) ? body.users : [];
+    alleNutzer.forEach((p) => { if (!alleAnzeigeNamen[p.username]) alleAnzeigeNamen[p.username] = p.displayName; });
+  } catch (e) {
+    alleNutzer = [];
+  }
+}
+
+// Wer die App bearbeiten darf, kann eine Aufgabe abhaken und deshalb überhaupt
+// Empfänger sein. `personen` ist genau diese Liste (list-tool-editors).
+function istBearbeiter(username) {
+  return personen.some((p) => p.username === username);
+}
+
+// Vereinigung beider Quellen. list-directory liefert nur Personal, in einer
+// Bearbeiter-Gruppe könnte aber auch ein Konto stehen, das dort nicht auftaucht —
+// wer schon Empfänger sein kann, muss auch wählbar bleiben. Zusätzliche Namen
+// (z. B. ausgeschiedene Mitglieder eines gespeicherten Ressorts) kommen über
+// `extra` dazu, damit eine bestehende Auswahl nie unsichtbar wird.
+function personenBasis(extra) {
+  const raus = [];
+  const gesehen = new Set();
+  alleNutzer.concat(personen).forEach((p) => {
+    if (gesehen.has(p.username)) return;
+    gesehen.add(p.username);
+    raus.push({ username: p.username, displayName: p.displayName });
+  });
+  (extra || []).forEach((u) => {
+    if (!u || gesehen.has(u)) return;
+    gesehen.add(u);
+    raus.push({ username: u, displayName: nameVon(u) });
+  });
+  raus.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return raus;
+}
+
+function passtZurSuche(p, suche) {
+  if (!suche) return true;
+  return p.displayName.toLowerCase().includes(suche) || p.username.toLowerCase().includes(suche);
 }
 
 // ---------- Rendering: Übersicht ----------
@@ -711,10 +765,9 @@ function oeffneZuweisen() {
   document.getElementById("zw-prioritaet").innerHTML =
     PRIORITAETEN.map((p) => `<option value="${p.id}"${p.id === "normal" ? " selected" : ""}>${escapeHtml(p.label)}</option>`).join("");
 
-  const erlaubte = personen.filter((p) => darfZuweisenAn(p.username));
-  document.getElementById("zw-personen").innerHTML = erlaubte.length
-    ? erlaubte.map((p) => `<label><input type="checkbox" value="${escapeHtml(p.username)}" /> ${escapeHtml(p.displayName)}</label>`).join("")
-    : `<p class="muted">Du kannst niemandem eine Aufgabe zuweisen. Dafür musst du ein Ressort verantworten oder vertreten.</p>`;
+  zwAuswahl = new Set();
+  document.getElementById("zw-personen-suche").value = "";
+  renderZuweisenPersonen();
 
   const meineRessorts = ressorts.filter((r) => canAdmin() || r.verantwortlich === currentUser.username || r.stellvertreter === currentUser.username);
   document.getElementById("zw-ressort").innerHTML = meineRessorts.length
@@ -723,6 +776,52 @@ function oeffneZuweisen() {
 
   aktualisiereZuweisenModus();
   document.getElementById("zuweisen-modal").classList.remove("hidden");
+}
+
+// Der Kreis ändert sich durch die Suche NICHT: wählbar bleibt nur, wem man nach
+// der Ressort-Struktur überhaupt etwas auftragen darf und wer die App bearbeiten
+// kann. Das Feld hilft beim Finden, es öffnet nichts.
+function renderZuweisenPersonen() {
+  const suche = document.getElementById("zw-personen-suche").value.trim().toLowerCase();
+  const erlaubte = personen.filter((p) => darfZuweisenAn(p.username))
+    .slice().sort((a, b) => a.displayName.localeCompare(b.displayName));
+  const feld = document.getElementById("zw-personen-suche-feld");
+  const status = document.getElementById("zw-personen-status");
+
+  if (!erlaubte.length) {
+    feld.classList.add("hidden");
+    status.textContent = "";
+    document.getElementById("zw-personen").innerHTML =
+      `<p class="muted">Du kannst niemandem eine Aufgabe zuweisen. Dafür musst du ein Ressort verantworten oder vertreten.</p>`;
+    return;
+  }
+  feld.classList.remove("hidden");
+
+  const sichtbar = erlaubte.filter((p) => zwAuswahl.has(p.username) || passtZurSuche(p, suche));
+  document.getElementById("zw-personen").innerHTML = sichtbar.length
+    ? sichtbar.map((p) =>
+        `<label><input type="checkbox" value="${escapeHtml(p.username)}"${zwAuswahl.has(p.username) ? " checked" : ""} />` +
+        `<span>${escapeHtml(p.displayName)}</span></label>`).join("")
+    : `<p class="muted">Niemand gefunden.</p>`;
+
+  aktualisiereZwStatus();
+}
+
+// Wie aktualisiereRfStatus, gleicher Sonderfall: was bei "kein Treffer" noch in
+// der Liste steht, sind die schon Gewählten und keine Fundstücke.
+function aktualisiereZwStatus() {
+  const suche = document.getElementById("zw-personen-suche").value.trim().toLowerCase();
+  const erlaubte = personen.filter((p) => darfZuweisenAn(p.username));
+  const gezeigt = document.querySelectorAll("#zw-personen input[type=checkbox]").length;
+  const teile = [];
+  if (suche && !erlaubte.some((p) => passtZurSuche(p, suche))) {
+    teile.push("Kein Treffer");
+    if (zwAuswahl.size) teile.push(`${zwAuswahl.size} bereits gewählt, deshalb weiter sichtbar`);
+  } else {
+    teile.push(`${gezeigt} von ${erlaubte.length} angezeigt`);
+    if (zwAuswahl.size) teile.push(`${zwAuswahl.size} gewählt`);
+  }
+  document.getElementById("zw-personen-status").textContent = teile.join(" · ");
 }
 
 function aktualisiereZuweisenModus() {
@@ -753,7 +852,8 @@ async function speichereZuweisung() {
   };
 
   if (modus === "person") {
-    daten.empfaenger = Array.from(document.querySelectorAll("#zw-personen input:checked")).map((c) => c.value);
+    // Aus dem Set, nicht aus dem DOM — bei aktiver Suche steht dort nur ein Teil.
+    daten.empfaenger = Array.from(zwAuswahl);
     if (!daten.empfaenger.length) { alert("Bitte mindestens eine Person auswählen."); return; }
   } else {
     daten.ressortId = document.getElementById("zw-ressort").value;
@@ -776,33 +876,44 @@ async function speichereZuweisung() {
 // Hinweis, den man wegklicken muss.
 function meldeVersand(body) {
   const angelegt = (body && body.angelegt) || 1;
+  const kopf = `${angelegt} ${angelegt === 1 ? "Aufgabe" : "Aufgaben"} zugewiesen`;
+  const hinweise = [];
+  let statusZusatz = "";
+
+  // Beim Auffächern an ein Ressort überspringt der Server jedes Mitglied ohne
+  // Bearbeiten-Recht — es könnte die Aufgabe nie abhaken. Das MUSS auffallen:
+  // sonst hält der Zuweiser jemanden für beauftragt, der nie etwas bekommen hat.
+  const ohneRecht = (body && body.ohneRecht) || [];
+  if (ohneRecht.length) {
+    hinweise.push(`Keine Aufgabe bekommen: ${ohneRecht.join(", ")}.\n` +
+      `Diese Ressort-Mitglieder dürfen die Vereinsaufgaben nicht bearbeiten und könnten eine Aufgabe nicht abhaken. ` +
+      `Sollen sie welche bekommen, muss in der Tools-Übersicht erst das Bearbeiten-Recht vergeben werden.`);
+  }
+
   // Antwortet noch der alte Worker (Pages ist vor dem Worker-Deploy draußen),
   // fehlen die Versandfelder komplett. Dann darf hier NICHTS über E-Mails stehen —
   // aus fehlenden Feldern "0 benachrichtigt" zu rechnen würde einen Fehlschlag
   // melden, den es nicht gab.
-  if (!body || typeof body.benachrichtigt !== "number") {
-    setStatusText(`${angelegt} ${angelegt === 1 ? "Aufgabe" : "Aufgaben"} zugewiesen`);
-    return;
-  }
-  const benachrichtigt = body.benachrichtigt;
-  const ohne = body.ohneAdresse || [];
-  const mailAus = !!body.mailAus;
-  const kopf = `${angelegt} ${angelegt === 1 ? "Aufgabe" : "Aufgaben"} zugewiesen`;
-  const fehlgeschlagen = mailAus ? 0 : Math.max(0, angelegt - benachrichtigt - ohne.length);
+  if (body && typeof body.benachrichtigt === "number") {
+    const benachrichtigt = body.benachrichtigt;
+    const ohne = body.ohneAdresse || [];
+    const mailAus = !!body.mailAus;
+    const fehlgeschlagen = mailAus ? 0 : Math.max(0, angelegt - benachrichtigt - ohne.length);
 
-  const hinweise = [];
-  if (mailAus) {
-    hinweise.push("Es wurde keine E-Mail verschickt — der Mailversand ist gerade nicht verfügbar. Die Aufgabe steht trotzdem in der Liste.");
-  }
-  if (ohne.length) {
-    hinweise.push(`Keine E-Mail bekommen: ${ohne.join(", ")}.\nIn den Trainerdaten ist dazu keine E-Mail-Adresse hinterlegt.`);
-  }
-  if (fehlgeschlagen) {
-    hinweise.push(`Bei ${fehlgeschlagen} ${fehlgeschlagen === 1 ? "Empfänger" : "Empfängern"} ist der Mailversand fehlgeschlagen.`);
+    if (mailAus) {
+      hinweise.push("Es wurde keine E-Mail verschickt — der Mailversand ist gerade nicht verfügbar. Die Aufgabe steht trotzdem in der Liste.");
+    }
+    if (ohne.length) {
+      hinweise.push(`Keine E-Mail bekommen: ${ohne.join(", ")}.\nIn den Trainerdaten ist dazu keine E-Mail-Adresse hinterlegt.`);
+    }
+    if (fehlgeschlagen) {
+      hinweise.push(`Bei ${fehlgeschlagen} ${fehlgeschlagen === 1 ? "Empfänger" : "Empfängern"} ist der Mailversand fehlgeschlagen.`);
+    }
+    if (benachrichtigt) statusZusatz = ` · ${benachrichtigt} per E-Mail benachrichtigt`;
   }
 
   if (!hinweise.length) {
-    setStatusText(benachrichtigt ? `${kopf} · ${benachrichtigt} per E-Mail benachrichtigt` : kopf);
+    setStatusText(kopf + statusZusatz);
     return;
   }
   setStatusText(kopf);
@@ -827,12 +938,53 @@ function oeffneRessortModal(id) {
   ver.value = r ? (r.verantwortlich || "") : "";
   stv.value = r ? (r.stellvertreter || "") : "";
 
-  const mitglieder = r ? (r.mitglieder || []) : [];
-  document.getElementById("rf-mitglieder").innerHTML = personen.map((p) =>
-    `<label><input type="checkbox" value="${escapeHtml(p.username)}"${mitglieder.includes(p.username) ? " checked" : ""} /> ${escapeHtml(p.displayName)}</label>`).join("");
+  rfAuswahl = new Set(r ? (r.mitglieder || []) : []);
+  document.getElementById("rf-mitglieder-suche").value = "";
+  renderRessortMitglieder();
 
   document.getElementById("rf-loeschen").classList.toggle("hidden", !r);
   document.getElementById("ressort-modal").classList.remove("hidden");
+}
+
+// Ohne Suchtext stehen hier die möglichen Empfänger — das ist die Liste, mit der
+// man im Alltag arbeitet. Wer getippt hat, sucht im ganzen Verein; die Treffer
+// kommen dann dazu, samt Kennzeichen für alle, die keine Aufgabe annehmen können.
+// Gewählte bleiben in beiden Fällen stehen (siehe rfAuswahl).
+function renderRessortMitglieder() {
+  const suche = document.getElementById("rf-mitglieder-suche").value.trim().toLowerCase();
+  const basis = personenBasis(Array.from(rfAuswahl));
+  const sichtbar = basis.filter((p) =>
+    rfAuswahl.has(p.username) || (suche ? passtZurSuche(p, suche) : istBearbeiter(p.username)));
+
+  document.getElementById("rf-mitglieder").innerHTML = sichtbar.length
+    ? sichtbar.map((p) => {
+        const ohneRecht = !istBearbeiter(p.username);
+        return `<label><input type="checkbox" value="${escapeHtml(p.username)}"${rfAuswahl.has(p.username) ? " checked" : ""} />` +
+          `<span>${escapeHtml(p.displayName)}` +
+          `${ohneRecht ? `<span class="mitglied-hinweis">bekommt keine Aufgaben</span>` : ""}</span></label>`;
+      }).join("")
+    : `<p class="muted">Niemand gefunden.</p>`;
+
+  aktualisiereRfStatus();
+}
+
+// Der Sonderfall, der sonst lügt: die Suche findet nichts, in der Liste stehen
+// aber trotzdem Namen — nämlich die Gewählten, die absichtlich nie ausgeblendet
+// werden. Ohne diesen Zweig läse sich das wie ein Treffer.
+function aktualisiereRfStatus() {
+  const suche = document.getElementById("rf-mitglieder-suche").value.trim().toLowerCase();
+  const basis = personenBasis(Array.from(rfAuswahl));
+  const gezeigt = document.querySelectorAll("#rf-mitglieder input[type=checkbox]").length;
+  const teile = [];
+  if (suche && !basis.some((p) => passtZurSuche(p, suche))) {
+    teile.push("Kein Treffer");
+    if (rfAuswahl.size) teile.push(`${rfAuswahl.size} bereits gewählt, deshalb weiter sichtbar`);
+  } else {
+    teile.push(`${gezeigt} von ${basis.length} angezeigt`);
+    if (rfAuswahl.size) teile.push(`${rfAuswahl.size} gewählt`);
+    if (!suche) teile.push("weitere über die Suche");
+  }
+  document.getElementById("rf-mitglieder-status").textContent = teile.join(" · ");
 }
 
 async function speichereRessortForm() {
@@ -842,7 +994,10 @@ async function speichereRessortForm() {
     beschreibung: document.getElementById("rf-beschreibung").value.trim(),
     verantwortlich: document.getElementById("rf-verantwortlich").value,
     stellvertreter: document.getElementById("rf-stellvertreter").value,
-    mitglieder: Array.from(document.querySelectorAll("#rf-mitglieder input:checked")).map((c) => c.value)
+    // Aus dem Set, nicht aus dem DOM: die Liste zeigt bei aktiver Suche nur einen
+    // Ausschnitt, ein DOM-Abgriff würde jeden gerade ausgeblendeten Gewählten
+    // beim Speichern verlieren.
+    mitglieder: Array.from(rfAuswahl)
   };
   if (!ressort.name) { alert("Bitte einen Namen angeben."); return; }
   if (!ressort.verantwortlich) { alert("Ein Ressort braucht genau einen Verantwortlichen."); return; }
@@ -948,6 +1103,15 @@ function setupListeners() {
   document.getElementById("zw-speichern").addEventListener("click", (e) => { e.preventDefault(); speichereZuweisung(); });
   document.querySelectorAll("input[name='zw-modus']").forEach((r) => r.addEventListener("change", aktualisiereZuweisenModus));
   document.getElementById("zw-ressort").addEventListener("change", aktualisiereZuweisenModus);
+  document.getElementById("zw-personen-suche").addEventListener("input", renderZuweisenPersonen);
+  // Nur das Set pflegen, NICHT neu zeichnen: ein Neurender beim Klick würde die
+  // gerade abgewählte Zeile sofort verschwinden lassen, sobald die Suche greift.
+  document.getElementById("zw-personen").addEventListener("change", (e) => {
+    const cb = e.target.closest("input[type=checkbox]");
+    if (!cb) return;
+    if (cb.checked) zwAuswahl.add(cb.value); else zwAuswahl.delete(cb.value);
+    aktualisiereZwStatus();
+  });
 
   document.getElementById("detail-close").addEventListener("click", schliesseDetail);
   document.getElementById("detail-schliessen").addEventListener("click", schliesseDetail);
@@ -994,6 +1158,13 @@ function setupListeners() {
   document.getElementById("ressort-close").addEventListener("click", () => document.getElementById("ressort-modal").classList.add("hidden"));
   document.getElementById("rf-abbrechen").addEventListener("click", (e) => { e.preventDefault(); document.getElementById("ressort-modal").classList.add("hidden"); });
   document.getElementById("rf-speichern").addEventListener("click", (e) => { e.preventDefault(); speichereRessortForm(); });
+  document.getElementById("rf-mitglieder-suche").addEventListener("input", renderRessortMitglieder);
+  document.getElementById("rf-mitglieder").addEventListener("change", (e) => {
+    const cb = e.target.closest("input[type=checkbox]");
+    if (!cb) return;
+    if (cb.checked) rfAuswahl.add(cb.value); else rfAuswahl.delete(cb.value);
+    aktualisiereRfStatus();
+  });
   document.getElementById("rf-loeschen").addEventListener("click", (e) => { e.preventDefault(); loescheRessortForm(); });
   document.getElementById("btn-uebergabe").addEventListener("click", starteUebergabe);
 
@@ -1032,6 +1203,7 @@ async function init() {
 
   try {
     await ladePersonen();
+    await ladeAlleNutzer();
     await ladeDaten();
   } catch (e) {
     zeigeFehler(e);

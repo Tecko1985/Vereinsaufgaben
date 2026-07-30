@@ -260,6 +260,23 @@ body.can-edit .list-row:hover { background: var(--blue-light); }
 .icon-btn.edit:hover { background: var(--blue); color: white; }
 
 .checkbox-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 6px 14px; }
+/* Suchfeld über einer Kästchenliste. Das Feld selbst braucht keine eigenen Maße --
+   `.form-field input:not([type=checkbox]):not([type=radio])` weiter unten greift
+   auch auf type="search" und gibt ihm Breite, Rahmen und Innenabstand. */
+.personen-suche { margin-bottom: 8px; }
+/* Die Liste MUSS gedeckelt sein, seit die Suche über das ganze Verzeichnis geht:
+   ungebremst würde sie den Dialog um jeden Treffer länger machen und am Handy die
+   Knöpfe unter den Bildschirmrand schieben (bei 375x812 gemessen). Der Rahmen ist
+   kein Schmuck -- ohne ihn sieht man einer abgeschnittenen Liste nicht an, dass
+   sie scrollt. */
+.checkbox-list.begrenzt {
+  max-height: 230px; overflow-y: auto;
+  border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+}
+/* Steht unter dem Namen, nicht dahinter: in einer schmalen Rasterspalte würde eine
+   zweite Angabe in derselben Zeile die Namen unterschiedlich weit einrücken. */
+.mitglied-hinweis { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; }
+.muted.mini { font-size: 11px; margin: 6px 0 0; }
 .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
 .checkbox-row input { width: 16px; height: 16px; }
 
