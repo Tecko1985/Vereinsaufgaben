@@ -28,28 +28,6 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
-    version: "1.2",
-    groups: [
-      {
-        title: "Personen suchen statt scrollen",
-        items: [
-          "Über der Kästchenliste steht jetzt ein Suchfeld — im Ressort-Dialog und beim Zuweisen an einzelne Personen. Die Kästchen bleiben wie sie waren; die Suche kommt dazu.",
-          "Unter der Liste steht, wie viele Namen gerade angezeigt werden und wie viele davon ausgewählt sind. Wer ausgewählt ist, bleibt sichtbar, auch wenn die Suche ihn nicht mehr findet — eine Auswahl verschwindet nie stillschweigend.",
-          "Beim Zuweisen ändert die Suche nichts am Kreis: wählbar bleibt, wem man nach der Ressort-Zuständigkeit ohnehin etwas auftragen darf."
-        ]
-      },
-      {
-        title: "Ressorts ohne App-Zugriff zusammenstellen",
-        items: [
-          "Ein Ressort lässt sich jetzt mit jedem Vereinskonto besetzen — auch mit Personen, die die Vereinsaufgaben gar nicht bearbeiten dürfen. Bisher musste erst jedem Beteiligten der volle Zugriff auf das Tool eingeräumt werden, bevor er überhaupt in ein Ressort passte.",
-          "Die Suche im Ressort-Dialog geht deshalb über das ganze Verzeichnis. Wer keine Aufgaben annehmen kann, ist in der Liste ausdrücklich als solcher gekennzeichnet.",
-          "Verantwortlich und Stellvertretung bleiben auf die Bearbeiter beschränkt: bei einer Zuweisung an das Ressort landet die Aufgabe beim Verantwortlichen, und der muss sie abhaken können.",
-          "Wird an jedes Ressort-Mitglied einzeln zugewiesen, überspringt die App die Mitglieder ohne Bearbeiten-Recht und sagt anschließend namentlich, wer keine Aufgabe bekommen hat."
-        ]
-      }
-    ]
-  },
-  {
     version: "1.1",
     groups: [
       {

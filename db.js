@@ -158,15 +158,6 @@ async function ladeMoeglicheEmpfaenger() {
   return gatewayRequest({ action: "list-tool-editors", app: GATEWAY_APP_ID });
 }
 
-// Vollständiges Personalverzeichnis für die Mitgliedersuche im Ressort-Dialog: ein
-// Ressort soll sich zusammenstellen lassen, OHNE jedem Beteiligten vorher das
-// Bearbeiten-Recht auf die ganze App zu geben. Bestehende Aktion, dieselbe, die
-// der "Teilen mit"-Picker im Vereinskalender nutzt — kein neuer Endpunkt und
-// bewusst ohne `app`: list-directory ist nicht an ein Tool gebunden.
-async function ladeVerzeichnis() {
-  return gatewayRequest({ action: "list-directory" });
-}
-
 // Liefert {username, isAdmin, groupIds, vorname, nachname, canEdit, canAdmin}.
 async function fetchMe() {
   return gatewayRequest({ action: "me", app: GATEWAY_APP_ID });
