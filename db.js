@@ -98,6 +98,12 @@ async function zieheAufgabeZurueck(id, grund) {
   return gatewayRequest({ action: "vereinsaufgabe-zurueckziehen", app: GATEWAY_APP_ID, id, grund: grund || "" });
 }
 
+// Holt eine abgeschlossene Aufgabe (erledigt/abgelehnt/zurueckgezogen) zurueck auf
+// "offen". Rechte wie beim Zurueckziehen — der Server prueft es noch einmal.
+async function reaktiviereAufgabe(id) {
+  return gatewayRequest({ action: "vereinsaufgabe-reaktivieren", app: GATEWAY_APP_ID, id });
+}
+
 async function loescheAufgabe(id) {
   return gatewayRequest({ action: "vereinsaufgabe-loeschen", app: GATEWAY_APP_ID, id });
 }

@@ -533,6 +533,10 @@ function oeffneDetail(id) {
 function verlaufText(v) {
   const felder = { titel: "Titel", beschreibung: "Beschreibung", faellig: "Frist", prioritaet: "Priorität" };
   if (v.was === "status") return `Status: ${statusInfo(v.alt).label} → ${statusInfo(v.neu).label}`;
+  // Beim Wiedereröffnen räumt der Server die Begründung des Abschlusses aus dem
+  // Datensatz, damit sie einer offenen Aufgabe nicht widerspricht. Dieser
+  // Verlaufseintrag ist danach der einzige Ort, an dem sie noch steht.
+  if (v.was === "abschlussgrund") return `Begründung des aufgehobenen Abschlusses: ${v.alt}`;
   if (v.was === "empfaenger") return `Empfänger: ${nameVon(v.alt)} → ${nameVon(v.neu)}`;
   const name = felder[v.was] || v.was;
   if (v.was === "faellig") return `${name}: ${datumLesbar(v.alt)} → ${datumLesbar(v.neu)}`;
@@ -560,6 +564,12 @@ function renderDetailAktionen(a, binEmpfaenger, binZuweiser) {
   }
   if (canEdit() && (binZuweiser || canAdmin()) && (a.status === "offen" || a.status === "gemeldet")) {
     knoepfe.push(`<button class="btn secondary" data-akt="zurueckziehen">Zurückziehen…</button>`);
+  }
+  // Der Rückweg aus einem Endzustand. Gleiche Rechte wie das Zurückziehen, weil
+  // ein Administrierender den Zustand erzeugt haben kann und ihn dann auch
+  // zurücknehmen können muss — anders als bei der Abnahme oben.
+  if (canEdit() && (binZuweiser || canAdmin()) && istAbgeschlossen(a)) {
+    knoepfe.push(`<button class="btn secondary" data-akt="reaktivieren">Wieder öffnen…</button>`);
   }
 
   box.innerHTML = knoepfe.join("") || `<span class="muted">Für dich gibt es an diesem Vorgang nichts zu tun.</span>`;
@@ -592,6 +602,12 @@ async function fuehreAktionAus(aktion) {
     } else if (aktion === "zurueckziehen") {
       const grund = prompt("Warum ziehst du die Aufgabe zurück? (freiwillig)") || "";
       await zieheAufgabeZurueck(a.id, grund.trim());
+    } else if (aktion === "reaktivieren") {
+      // Nachfragen, weil es einen abgeschlossenen Vorgang wieder aufmacht — bei
+      // „Erledigt“ hebt es außerdem eine erteilte Abnahme auf.
+      const frage = `Diese Aufgabe wieder auf „Offen“ setzen?\n\nDer Abschluss (${statusInfo(a.status).label}) wird aufgehoben und die Aufgabe liegt wieder bei ${nameVon(a.empfaenger)}. Der Verlauf hält das fest.`;
+      if (!confirm(frage)) return;
+      await reaktiviereAufgabe(a.id);
     } else {
       await setzeStatus(a.id, aktion, "");
     }

@@ -28,6 +28,20 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
+    version: "1.3",
+    groups: [
+      {
+        title: "Abgeschlossene Aufgaben wieder öffnen",
+        items: [
+          "Eine Aufgabe, die erledigt, abgelehnt oder zurückgezogen wurde, lässt sich über den Knopf „Wieder öffnen…“ im Vorgang zurück auf offen holen. Gedacht für den Fall, dass ein Abschluss ein Versehen war.",
+          "Das darf, wer die Aufgabe gestellt hat, und wer administriert — dieselbe Regel wie beim Zurückziehen. Ein Wiedereröffnen ist eine Korrektur und kein Urteil über geleistete Arbeit, und wer einen Vorgang zurückgezogen hat, muss das auch rückgängig machen können.",
+          "Der Verlauf hält fest, aus welchem Zustand die Aufgabe zurückgeholt wurde und von wem. War eine Begründung hinterlegt — etwa der Grund einer Ablehnung —, wird sie in den Verlauf übernommen, bevor sie aus dem Vorgang verschwindet.",
+          "Die Gegenseite bekommt eine Nachricht aufs Handy: die Aufgabe liegt wieder auf ihrem Tisch."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.2",
     groups: [
       {
