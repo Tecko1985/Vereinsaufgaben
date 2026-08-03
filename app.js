@@ -997,10 +997,6 @@ function setupListeners() {
   document.getElementById("rf-loeschen").addEventListener("click", (e) => { e.preventDefault(); loescheRessortForm(); });
   document.getElementById("btn-uebergabe").addEventListener("click", starteUebergabe);
 
-  const badge = document.getElementById("version-badge");
-  badge.addEventListener("click", () => switchTab("info"));
-  badge.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); switchTab("info"); } });
-
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     ["ressort-modal", "zuweisen-modal", "detail-modal"].some((id) => {
@@ -1014,7 +1010,6 @@ function setupListeners() {
 // ---------- Start ----------
 
 async function init() {
-  document.getElementById("version-badge").textContent = "v" + APP_VERSION;
   document.getElementById("version-badge-2").textContent = "v" + APP_VERSION;
 
   try {
