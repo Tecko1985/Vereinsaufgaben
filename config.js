@@ -28,6 +28,19 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
+    version: "1.2",
+    groups: [
+      {
+        title: "Abnehmen darf nur, wer die Aufgabe gestellt hat",
+        items: [
+          "Verlangt eine Aufgabe eine Abnahme, entscheidet darüber ausschließlich die Person, die sie gestellt hat. Wer Administrieren-Rechte hat, kann eine fremde Meldung nicht mehr an ihrer Stelle abnehmen oder zur Nacharbeit zurückgeben.",
+          "Damit ist eine Lücke geschlossen: bisher konnte jemand mit Administrieren-Rechten eine Aufgabe, die ihm selbst gestellt wurde, erst als erledigt melden und sich anschließend selbst abnehmen — die verlangte Prüfung fand damit nie statt.",
+          "Unverändert bleibt, dass Administrieren eine Aufgabe ändern, zurückziehen oder löschen kann. Es geht allein um das Urteil darüber, ob eine geleistete Arbeit angenommen wird."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.1",
     groups: [
       {

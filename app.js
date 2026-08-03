@@ -550,7 +550,11 @@ function renderDetailAktionen(a, binEmpfaenger, binZuweiser) {
       : `<button class="btn success" data-akt="erledigt">Erledigt</button>`);
     knoepfe.push(`<button class="btn secondary" data-akt="abgelehnt">Ablehnen…</button>`);
   }
-  if (canEdit() && (binZuweiser || canAdmin()) && a.status === "gemeldet") {
+  // Abnehmen und Zurückgeben nur für den, der die Aufgabe gestellt hat.
+  // Administrieren zählt hier bewusst NICHT mit — sonst nähme ein Empfänger mit
+  // Admin-Recht seine eigene Meldung ab und die Abnahme wäre wirkungslos. Der
+  // Worker prüft dasselbe; die Zeile darunter (Zurückziehen) bleibt unberührt.
+  if (canEdit() && binZuweiser && a.status === "gemeldet") {
     knoepfe.push(`<button class="btn success" data-akt="abgenommen">Abnehmen</button>`);
     knoepfe.push(`<button class="btn secondary" data-akt="zurueckgegeben">Zurückgeben…</button>`);
   }
