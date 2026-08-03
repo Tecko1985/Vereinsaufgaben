@@ -28,6 +28,22 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
+    version: "1.1",
+    groups: [
+      {
+        title: "Nachricht aufs Handy, wenn sich etwas tut",
+        items: [
+          "Wer eine Rückfrage in einen Vorgang schreibt, erreicht damit jetzt auch die andere Seite: sie bekommt eine Nachricht aufs Handy, ohne dass jemand die App offen haben muss. Das gilt in beide Richtungen — die Antwort des Zuweisers meldet sich beim Empfänger genauso.",
+          "Ebenso melden sich die Statuswechsel: als erledigt gemeldet, zur Abnahme, abgenommen, abgelehnt, zurückgegeben und zurückgezogen.",
+          "Benachrichtigt werden ausschließlich die beiden Beteiligten eines Vorgangs. Wer über sein Ressort nur mitliest, bekommt nichts — er muss ja auch nichts tun.",
+          "Die Nachricht nennt weder den Titel der Aufgabe noch einen Namen noch den Wortlaut der Rückfrage: sie steht auf dem Sperrbildschirm, den auch jemand anders sehen kann. Was genau passiert ist, steht in der App.",
+          "Eingeschaltet wird das in der Tools-Übersicht unter „Mein Konto“ — mit demselben Schalter, über den schon neue Aufgaben gemeldet werden. Wer ihn ausschaltet, bekommt auch das hier nicht mehr.",
+          "Die E-Mail bleibt unverändert: sie geht weiterhin nur beim Anlegen einer Aufgabe raus."
+        ]
+      }
+    ]
+  },
+  {
     version: "1.0",
     groups: [
       {
