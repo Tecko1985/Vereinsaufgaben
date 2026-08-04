@@ -28,49 +28,6 @@ const MAX_ANHANG_MB = 8;
 
 const APP_CHANGELOG = [
   {
-    version: "1.3",
-    groups: [
-      {
-        title: "Abgeschlossene Aufgaben wieder öffnen",
-        items: [
-          "Eine Aufgabe, die erledigt, abgelehnt oder zurückgezogen wurde, lässt sich über den Knopf „Wieder öffnen…“ im Vorgang zurück auf offen holen. Gedacht für den Fall, dass ein Abschluss ein Versehen war.",
-          "Das darf, wer die Aufgabe gestellt hat, und wer administriert — dieselbe Regel wie beim Zurückziehen. Ein Wiedereröffnen ist eine Korrektur und kein Urteil über geleistete Arbeit, und wer einen Vorgang zurückgezogen hat, muss das auch rückgängig machen können.",
-          "Der Verlauf hält fest, aus welchem Zustand die Aufgabe zurückgeholt wurde und von wem. War eine Begründung hinterlegt — etwa der Grund einer Ablehnung —, wird sie in den Verlauf übernommen, bevor sie aus dem Vorgang verschwindet.",
-          "Die Gegenseite bekommt eine Nachricht aufs Handy: die Aufgabe liegt wieder auf ihrem Tisch."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.2",
-    groups: [
-      {
-        title: "Abnehmen darf nur, wer die Aufgabe gestellt hat",
-        items: [
-          "Verlangt eine Aufgabe eine Abnahme, entscheidet darüber ausschließlich die Person, die sie gestellt hat. Wer Administrieren-Rechte hat, kann eine fremde Meldung nicht mehr an ihrer Stelle abnehmen oder zur Nacharbeit zurückgeben.",
-          "Damit ist eine Lücke geschlossen: bisher konnte jemand mit Administrieren-Rechten eine Aufgabe, die ihm selbst gestellt wurde, erst als erledigt melden und sich anschließend selbst abnehmen — die verlangte Prüfung fand damit nie statt.",
-          "Unverändert bleibt, dass Administrieren eine Aufgabe ändern, zurückziehen oder löschen kann. Es geht allein um das Urteil darüber, ob eine geleistete Arbeit angenommen wird."
-        ]
-      }
-    ]
-  },
-  {
-    version: "1.1",
-    groups: [
-      {
-        title: "Nachricht aufs Handy, wenn sich etwas tut",
-        items: [
-          "Wer eine Rückfrage in einen Vorgang schreibt, erreicht damit jetzt auch die andere Seite: sie bekommt eine Nachricht aufs Handy, ohne dass jemand die App offen haben muss. Das gilt in beide Richtungen — die Antwort des Zuweisers meldet sich beim Empfänger genauso.",
-          "Ebenso melden sich die Statuswechsel: als erledigt gemeldet, zur Abnahme, abgenommen, abgelehnt, zurückgegeben und zurückgezogen.",
-          "Benachrichtigt werden ausschließlich die beiden Beteiligten eines Vorgangs. Wer über sein Ressort nur mitliest, bekommt nichts — er muss ja auch nichts tun.",
-          "Die Nachricht nennt weder den Titel der Aufgabe noch einen Namen noch den Wortlaut der Rückfrage: sie steht auf dem Sperrbildschirm, den auch jemand anders sehen kann. Was genau passiert ist, steht in der App.",
-          "Eingeschaltet wird das in der Tools-Übersicht unter „Mein Konto“ — mit demselben Schalter, über den schon neue Aufgaben gemeldet werden. Wer ihn ausschaltet, bekommt auch das hier nicht mehr.",
-          "Die E-Mail bleibt unverändert: sie geht weiterhin nur beim Anlegen einer Aufgabe raus."
-        ]
-      }
-    ]
-  },
-  {
     version: "1.0",
     groups: [
       {
@@ -89,8 +46,26 @@ const APP_CHANGELOG = [
           "Wer eine neue Aufgabe bekommt, wird per E-Mail informiert — mit Titel, Ressort, Frist und Text.",
           "Benachrichtigt wird, wer die Aufgabe erledigen muss: bei einer Zuweisung an ein Ressort der Verantwortliche, bei einer aufgefächerten Zuweisung jedes Mitglied. Wer nur mitliest, bekommt keine Mail.",
           "Eine vertrauliche Aufgabe verrät in der E-Mail weder Titel noch Text — nur, dass es sie gibt, bis wann sie läuft und dass die Einzelheiten in der App stehen.",
-          "Nur das Anlegen löst eine Mail aus. Erledigungen, Abnahmen und Kommentare bleiben bewusst still, damit aus der Benachrichtigung kein Rauschen wird.",
+          "Nur das Anlegen löst eine Mail aus. Erledigungen, Abnahmen und Kommentare bleiben im Mailweg bewusst still, damit aus der Benachrichtigung kein Rauschen wird — für sie gibt es die Nachricht aufs Handy.",
           "Die Adresse kommt aus den Trainerdaten. Ist dort keine hinterlegt, sagt die App beim Zuweisen ausdrücklich, wer keine E-Mail bekommen hat."
+        ]
+      },
+      {
+        title: "Nachricht aufs Handy, wenn sich etwas tut",
+        items: [
+          "Wer eine Rückfrage in einen Vorgang schreibt, erreicht damit auch die andere Seite: sie bekommt eine Nachricht aufs Handy, ohne dass jemand die App offen haben muss. Das gilt in beide Richtungen — die Antwort des Zuweisers meldet sich beim Empfänger genauso.",
+          "Ebenso melden sich die Statuswechsel: als erledigt gemeldet, zur Abnahme, abgenommen, abgelehnt, zurückgegeben, zurückgezogen und wieder geöffnet.",
+          "Benachrichtigt werden ausschließlich die beiden Beteiligten eines Vorgangs. Wer über sein Ressort nur mitliest, bekommt nichts — er muss ja auch nichts tun.",
+          "Die Nachricht nennt weder den Titel der Aufgabe noch einen Namen noch den Wortlaut der Rückfrage: sie steht auf dem Sperrbildschirm, den auch jemand anders sehen kann. Was genau passiert ist, steht in der App.",
+          "Eingeschaltet wird das in der Tools-Übersicht unter „Mein Konto“ — mit demselben Schalter, über den auch neue Aufgaben gemeldet werden. Wer ihn ausschaltet, bekommt auch das hier nicht."
+        ]
+      },
+      {
+        title: "Abgeschlossene Aufgaben wieder öffnen",
+        items: [
+          "Eine Aufgabe, die erledigt, abgelehnt oder zurückgezogen wurde, lässt sich über den Knopf „Wieder öffnen…“ im Vorgang zurück auf offen holen. Gedacht für den Fall, dass ein Abschluss ein Versehen war.",
+          "Der Verlauf hält fest, aus welchem Zustand die Aufgabe zurückgeholt wurde und von wem. War eine Begründung hinterlegt — etwa der Grund einer Ablehnung —, wird sie in den Verlauf übernommen, bevor sie aus dem Vorgang verschwindet.",
+          "Die Gegenseite bekommt eine Nachricht aufs Handy: die Aufgabe liegt wieder auf ihrem Tisch."
         ]
       },
       {
@@ -122,8 +97,10 @@ const APP_CHANGELOG = [
         title: "Wer darf was",
         items: [
           "Sehen: die eigenen Aufgaben und die des eigenen Ressorts.",
-          "Bearbeiten: Aufgaben zuweisen im eigenen Ressort, abnehmen, Druckansicht und CSV-Export.",
-          "Administrieren: Ressorts pflegen, jedem zuweisen, Aufgaben übertragen und das Protokoll einsehen.",
+          "Bearbeiten: Aufgaben zuweisen im eigenen Ressort, Druckansicht und CSV-Export.",
+          "Administrieren: Ressorts pflegen, jedem zuweisen, Aufgaben übertragen, ändern, zurückziehen, löschen und das Protokoll einsehen.",
+          "Abnehmen und zur Nacharbeit zurückgeben darf ausschließlich die Person, die die Aufgabe gestellt hat — auch Administrieren nicht an ihrer Stelle. Sonst könnte jemand eine Aufgabe, die ihm selbst gestellt wurde, erst als erledigt melden und sich anschließend selbst abnehmen; die verlangte Prüfung fände nie statt.",
+          "Wieder öffnen darf, wer die Aufgabe gestellt hat, und wer administriert — dieselbe Regel wie beim Zurückziehen. Ein Wiedereröffnen ist eine Korrektur, kein Urteil über geleistete Arbeit.",
           "Der Reiter „Info“ ist für alle sichtbar."
         ]
       },
